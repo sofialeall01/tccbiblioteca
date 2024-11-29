@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('historico', function (Blueprint $table) {
             $table->id();
-            $table->date('data_inicio_leitura');
-            $table->date('data_fim_leitura');
+            $table->date('data_inicio_leitura')->nullable();
+            $table->date('data_fim_leitura')->nullable();
             $table->foreignId('livro_id')->constrained('livro')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Alterado para 'users'
 

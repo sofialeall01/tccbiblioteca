@@ -11,12 +11,16 @@ class Historico extends Model
 
     protected $table = 'historico';
 
-    protected $fillable = ['data_inicio_leitura', 'data_fim_leitura', 'livro_id', 'usuario_id'];
+    protected $fillable = ['data_inicio_leitura', 'data_fim_leitura', 'livro_id', 'user_id'];
 
     public function livro()
     {
         return $this->belongsTo(Livro::class);
     }
+    public function historicoLeitura()
+{
+    return $this->hasOne(HistoricoLeitura::class);
+}
 
     public function usuario()
     {

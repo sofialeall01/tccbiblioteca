@@ -28,6 +28,8 @@
   <link href="{{asset('tema/assets/vendor/swiper/swiper-bundle.min.css')}}" rel="stylesheet">
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 
@@ -78,17 +80,39 @@
     border: 1px solid white;
     padding: 10px 20px;
   }
-  /* Ajuste adicional para garantir o layout da tabela */
-#gallery .gallery-item {
-    width: 200px;
-    margin-right: 250px; /* Ajuste conforme necessário */
-    text-align: center;
+      /* Ajuste adicional para garantir o layout da tabela */
+    #gallery .gallery-item {
+        width: 200px;
+        margin-right: 250px; /* Ajuste conforme necessário */
+        text-align: center;
+    }
+
+    #gallery img {
+        width: 100%;
+        height: auto;
+    }
+
+    .icone-certo {
+    color: rgb(92, 201, 201); /* Cor do ícone */
+    font-size: 24px; /* Tamanho do ícone */
+    background-color: black; /* Fundo preto */
+    border-radius: 50%; /* Borda arredondada */
+    padding: 5px; /* Espaçamento interno */
+    border: none !important; /* Força a remoção de qualquer borda */
+    box-shadow: none !important; /* Remover qualquer sombra */
+    transition: transform 0.3s ease, color 0.3s ease; /* Efeito de transição */
 }
 
-#gallery img {
-    width: 100%;
-    height: auto;
+.icone-certo:hover {
+    color: black; /* Cor do ícone ao passar o mouse */
+    background-color: rgb(92, 201, 201); /* Cor de fundo ao passar o mouse */
+    transform: scale(1.1); /* Aumenta o ícone ao passar o mouse */
 }
+
+
+
+
+
 
 </style>
 
@@ -115,9 +139,7 @@
       </nav>
 
       <div class="header-social-links">
-        <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
-        <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-        <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+        
       </div>
 
     </div>
@@ -125,23 +147,25 @@
 
   <main class="main">
 
-    <!-- Page Title -->
-    <div class="page-title" data-aos="fade">
-      <div class="heading">
+   <!-- Exibir formulário de pesquisa -->
+<div class="page-title" data-aos="fade">
+    <div class="heading">
         <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1>Biblioteca</h1>
-              <form action="/buscar" method="GET" class="search-form">
-                <input type="search" name="query" class="form-control" placeholder="Pesquisar livros..." required>
-                <button type="submit" class="btn btn-primary">Pesquisar</button>
-              </form>
+            <div class="row d-flex justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h1>Biblioteca</h1>
+                    <form action="/buscar" method="GET" class="search-form">
+                        <input type="search" name="query" class="form-control" placeholder="Pesquisar livros..." required>
+                        <button type="submit" class="btn btn-primary">Pesquisar</button>
+                    </form>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      
-    </div><!-- End Page Title -->
+    </div>
+</div>
+
+
+
 
     <section id="gallery" class="gallery section">
     <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
@@ -169,7 +193,8 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <iframe src="{{ asset('storage/app/public/arquivos' . $livro->arquivo) }}" style="width: 100%; height: 80vh;" frameborder="0"></iframe>
+                                        <iframe src="{{ asset('storage/arquivos/' . $livro->arquivo) }}" style="width: 100%; height: 80vh;" frameborder="0"></iframe>
+
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: black; color: rgb(92, 201, 201); border: 1px solid white;">Fechar</button>
@@ -177,104 +202,13 @@
                                     </div>
                                 </div>
                             </div>
-                          <!-- Link para edição -->
-                          <!-- Link para edição -->
-                    <!-- Link para edição -->
-                    <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal(1)">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-
-
-                      <!-- Modal -->
-               <!-- Modal -->
-                <div class="modal fade" id="livroModal" tabindex="-1" aria-labelledby="livroModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content" style="background-color: black; color: rgb(92, 201, 201);">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="livroModalLabel">Editar Livro</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="livroForm" enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label for="titulo" class="form-label" style="color:white;">Título</label>
-                                        <input type="text" class="form-control" id="titulo" name="titulo" required style="background-color: black; color: white;">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="numeroPaginas" class="form-label" style="color:white;">Número de Páginas</label>
-                                        <input type="number" class="form-control" id="numeroPaginas" name="numero_paginas" required style="background-color: black; color: white">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="autores" class="form-label" style="color:white;">Autor(s)</label>
-                                        <input type="text" class="form-control" name="autores[]" required style="background-color: black; color: white;">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="arquivo" class="form-label" style="color:white;">Arquivo (PDF)</label>
-                                        <input type="file" class="form-control" id="arquivo" name="arquivo" accept=".pdf" required style="background-color: black; color: white;">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="fotoCapa" class="form-label" style="color:white;">Capa do Livro</label>
-                                        <input type="file" class="form-control" id="fotoCapa" name="fotoCapa" accept="image/*" required style="background-color: black; color: white">
-                                    </div>
-                                    <div class="mb-3 text-center">
-                                        <button type="submit" class="btn btn-primary" style="background-color: black; color: rgb(92, 201, 201); border: 1px solid white;">Atualizar Livro</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                    <script>
-                    // Função para abrir o modal e preencher com os dados do livro
-                    function openEditModal(livroId) {
-                        $.ajax({
-                            url: '/livros/editar/' + livroId, // URL para buscar os dados do livro
-                            method: 'GET',
-                            success: function(response) {
-                                // Preenche os campos do modal com os dados do livro
-                                $('#titulo').val(response.titulo);
-                                $('#numeroPaginas').val(response.numero_paginas);
-                                $('#authorsSection input[name="autores[]"]').val(response.autores.split(', ')); // Preenche os autores
-                                $('#livroModal').modal('show'); // Abre o modal
-                            },
-                            error: function() {
-                                alert('Erro ao carregar os dados do livro');
-                            }
-                        });
-                    }
-
-                    // Enviar os dados de edição
-                                    $('#livroForm').submit(function(e) {
-                    e.preventDefault(); // Impede o envio normal do formulário
-
-                    let formData = new FormData(this); // Pega os dados do formulário
-
-                    $.ajax({
-                        url: '/livros/editar/' + livroId, // URL para enviar os dados de atualização
-                        method: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            alert(response.message); // Exibe a mensagem de sucesso
-                            $('#livroModal').modal('hide'); // Fecha o modal
-                        },
-                        error: function() {
-                            alert('Erro ao atualizar o livro');
-                        }
-                    });
-                });
-
-                </script>
-
-
-                    
-
-                         
                           
-                            <!-- Formulário para remoção -->
+                    <!-- Link para edição -->
+                    <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal({{ $livro->id }})">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+   
+             <!-- Formulário para remoção -->
                             <form action="{{ route('livros.destroy', $livro->id) }}" method="POST" style="display: inline;" id="deleteForm{{ $livro->id }}">
                                 @csrf
                                 @method('DELETE')
@@ -293,27 +227,51 @@
 
                 <!-- Modal de informações -->
                 <div class="modal fade" id="infoModal{{ $livro->id }}" tabindex="-1" aria-labelledby="infoModalLabel{{ $livro->id }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content" style="background-color: black; color: white;">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="infoModalLabel{{ $livro->id }}">Informações do Livro</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p><strong>Título:</strong> {{ $livro->titulo }}</p>
-                                @if($livro->autores->isNotEmpty())
-                                    <p><strong>Autores:</strong> {{ $livro->autores->pluck('nome')->join(', ') }}</p>
-                                @else
-                                    <p><strong>Autores:</strong> Nenhum autor cadastrado.</p>
-                                @endif
-
-                                </p>
-                                <p><strong>Número de Páginas:</strong> {{ $livro->numero_paginas }}</p>
-                            </div>
+                <div class="modal-dialog">
+                    <div class="modal-content" style="background-color: black; color: white;">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="infoModalLabel{{ $livro->id }}">Informações do Livro</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Título:</strong> {{ $livro->titulo }}</p>
+                            @if($livro->autores->isNotEmpty())
+                                <p><strong>Autores:</strong> {{ $livro->autores->pluck('nome')->join(', ') }}</p>
+                            @else
+                                <p><strong>Autores:</strong> Nenhum autor cadastrado.</p>
+                            @endif
+                            <p><strong>Número de Páginas:</strong> {{ $livro->numero_paginas }}</p>
                             
+                            <!-- Campo para Data de Início -->
+                        <!-- Campo para Data de Início -->
+                                                    
+                        <<div class="mb-3">
+                                  <label for="inputDataInicio" class="form-label">Data de Início: </label>
+                                  <input type="date" id="inputDataInicio" class="form-control" />
+                                  <button id="btnSalvarInicio" data-livro-id="{{ $livro->id }}" class="btn btn-success mt-2">
+                                      <i class="fa fa-check icone-certo"></i> 
+                                  </button>
+                              </div>
+
+                              
+                              <div class="mb-3">
+                                  <label for="inputDataFim" class="form-label">Data de Fim:  </label>
+                                  <input type="date" id="inputDataFim" class="form-control" />
+                                  <button id="btnSalvarFim" data-livro-id="{{ $livro->id }}" class="btn btn-success mt-2">
+                                      <i class="fa fa-check icone-certo"></i> 
+                                  </button>
+                              </div>
+                          </div> 
+
+
+
+                            <!-- Exibir mensagens de sucesso ou erro -->
+                            <div id="mensagem{{ $livro->id }}" class="alert d-none"></div>
                         </div>
                     </div>
                 </div>
+            </div>
+
             @empty
                 <div class="col-12 text-center">
                     Nenhum livro encontrado.
@@ -375,6 +333,51 @@
             });
         });
 
+        ///script para as datas
+        $('#btnSalvarInicio').on('click', function () {
+          let livroId = $(this).data('livro-id');
+          let dataInicio = $('#inputDataInicio').val();
+
+          $.ajax({
+              url: '/historico/salvar',
+              method: 'POST',
+              data: {
+                  livro_id: livroId,
+                  data_inicio_leitura: dataInicio,
+                  _token: $('meta[name="csrf-token"]').attr('content'),
+              },
+              success: function (response) {
+                  alert(response.message); // Mensagem de sucesso
+              },
+              error: function (xhr) {
+                  alert('Erro ao salvar data de início: ' + xhr.responseJSON.message);
+              }
+          });
+      });
+
+      $('#btnSalvarFim').on('click', function () {
+          let livroId = $(this).data('livro-id');
+          let dataFim = $('#inputDataFim').val();
+
+          $.ajax({
+              url: '/historico/salvar',
+              method: 'POST',
+              data: {
+                  livro_id: livroId,
+                  data_fim_leitura: dataFim,
+                  _token: $('meta[name="csrf-token"]').attr('content'),
+              },
+              success: function (response) {
+                  alert(response.message); // Mensagem de sucesso
+              },
+              error: function (xhr) {
+                  alert('Erro ao salvar data de fim: ' + xhr.responseJSON.message);
+              }
+          });
+      });
+
+
+
                       </script>
 </section>
 
@@ -387,28 +390,7 @@
 
   </main>
 
-  <footer id="footer" class="footer">
-
-    <div class="container">
-      <div class="copyright text-center ">
-        <p>© <span>Copyright</span> <strong class="px-1 sitename">BiblioTec</strong> <span>All Rights Reserved</span></p>
-      </div>
-      <div class="social-links d-flex justify-content-center">
-        <a href=""><i class="bi bi-twitter-x"></i></a>
-        <a href=""><i class="bi bi-facebook"></i></a>
-        <a href=""><i class="bi bi-instagram"></i></a>
-      <a href=""><i class="bi bi-linkedin"></i></a>
-      </div>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you've purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-      </div>
-    </div>
-
-  </footer>
+  
 
   <!-- Scroll Top -->
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
@@ -429,8 +411,6 @@
   <script src="{{asset('tema/assets/js/main.js')}}"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
-<!-- Bootstrap JS (para interatividade como modais) -->
- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 

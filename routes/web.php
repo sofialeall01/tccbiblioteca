@@ -28,18 +28,10 @@ Route::post('/adicionar-livro', [LivroController::class, 'store'])->name('livro.
 Route::get('/exibir-livro', [LivroController::class, 'index'])->name('livros.index');
 Route::put('/livros/{id}', [LivroController::class, 'update'])->name('livros.update');
 Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros.destroy');
-Route::get('/livros/editar/{livro}', [LivroController::class, 'edit'])->name('livros.editar');
-Route::post('/livros/editar/{livro}', [LivroController::class, 'update']);
+Route::get('/buscar', [LivroController::class, 'buscar'])->name('livros.buscar');
+Route::post('/historico/salvar', [LivroController::class, 'salvarDataLeitura']);
+Route::get('/livro/{id}', [LivroController::class, 'show']);
 
-
-
-//rota para exibir o livro
-
-// Rota para atualizar um livro existente
-
-// Rota para excluir um livro existente
-
-//rota para logout
 
 Route::get('/', function () {
     return view('home');
