@@ -11,29 +11,53 @@ use Storage;
 
 class LivroController extends Controller
 {
+    public function getPdf($id)
+{
+    try {
+        // Busca o livro pelo ID
+        $livro = Livro::findOrFail($id);
+
+        // Verifica se o arquivo do livro existe
+        if (!$livro->arquivo) {
+            return response()->json(['success' => false, 'message' => 'Arquivo PDF não encontrado.']);
+        }
+
+        // Monta a URL completa do PDF
+        $pdfUrl = asset('storage/arquivos/' . $livro->arquivo);
+
+        return response()->json([
+            'success' => true,
+            'titulo' => $livro->titulo,
+            'pdfUrl' => $pdfUrl,
+        ]);
+    } catch (Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Erro ao buscar o livro.']);
+    }
+}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
-    {
-          // Passa a variável livros para a view
-          if (!auth()->check()) {
-            return redirect()->route('login');  // Se o usuário não estiver logado, redireciona para login
-        }
-    
-        $userId = auth()->user()->id;
-        
-        // Buscando os livros do usuário logado
-        $livros = Livro::where('user_id', $userId)->get();
-        
-        // Para cada livro, busque o histórico correspondente (livro_id == id do livro)
-        $historicos = [];
-        foreach ($livros as $livro) {
-            $historicos[$livro->id] = Historico::where('livro_id', $livro->id)->first(); // Buscando o histórico específico para cada livro
-        }
-    
-        return view('biblioteca', compact('livros', 'historicos'));
+{
+    if (!auth()->check()) {
+        return redirect()->route('login');  // Se o usuário não estiver logado, redireciona para login
     }
+
+    $userId = auth()->user()->id;
+    
+    // Buscando os livros do usuário logado
+    $livros = Livro::where('user_id', $userId)->get();
+    
+    // Para cada livro, busque o histórico correspondente (livro_id == id do livro)
+    $historicos = [];
+    foreach ($livros as $livro) {
+        $historicos[$livro->id] = Historico::where('livro_id', $livro->id)->first(); // Buscando o histórico específico para cada livro
+    }
+
+    return view('biblioteca', compact('livros', 'historicos'));
+}
+
     
     
 
@@ -62,47 +86,47 @@ class LivroController extends Controller
         
         
 
-public function salvarDataLeitura(Request $request)
-{
-    Log::info('Recebido no controlador:', $request->all());
+        public function salvarDataLeitura(Request $request)
+        {
+            Log::info('Recebido no controlador:', $request->all());
 
-    try {
-        // Valida os dados, mas permite que cada campo seja opcional
-        $validated = $request->validate([
-            'livro_id' => 'required|exists:livro,id', // Valida o ID do livro
-            'data_inicio_leitura' => 'nullable|date', // Permite data de início opcional
-            'data_fim_leitura' => 'nullable|date',    // Permite data de fim opcional
-        ]);
+            try {
+                // Valida os dados, mas permite que cada campo seja opcional
+                $validated = $request->validate([
+                    'livro_id' => 'required|exists:livro,id', // Valida o ID do livro
+                    'data_inicio_leitura' => 'nullable|date', // Permite data de início opcional
+                    'data_fim_leitura' => 'nullable|date',    // Permite data de fim opcional
+                ]);
 
-        // Busca ou cria o histórico do livro para o usuário logado
-        $historico = \App\Models\Historico::firstOrCreate(
-            [
-                'user_id' => Auth::id(),
-                'livro_id' => $validated['livro_id'],
-            ]
-        );
+                // Busca ou cria o histórico do livro para o usuário logado
+                $historico = \App\Models\Historico::firstOrCreate(
+                    [
+                        'user_id' => Auth::id(),
+                        'livro_id' => $validated['livro_id'],
+                    ]
+                );
 
-        // Atualiza os campos individualmente, sem dependência
-        if (!empty($validated['data_inicio_leitura'])) {
-            $historico->data_inicio_leitura = $validated['data_inicio_leitura'];
+                // Atualiza os campos individualmente, sem dependência
+                if (!empty($validated['data_inicio_leitura'])) {
+                    $historico->data_inicio_leitura = $validated['data_inicio_leitura'];
+                }
+
+                if (!empty($validated['data_fim_leitura'])) {
+                    $historico->data_fim_leitura = $validated['data_fim_leitura'];
+                }
+
+                // Salva as alterações no banco de dados
+                $historico->save();
+
+                Log::info('Histórico salvo:', $historico->toArray());
+
+                return response()->json(['message' => 'Data salva com sucesso!']);
+            } catch (\Exception $e) {
+                Log::error('Erro ao salvar:', ['error' => $e->getMessage()]);
+
+                return response()->json(['message' => 'Erro ao salvar a data.', 'error' => $e->getMessage()], 500);
+            }
         }
-
-        if (!empty($validated['data_fim_leitura'])) {
-            $historico->data_fim_leitura = $validated['data_fim_leitura'];
-        }
-
-        // Salva as alterações no banco de dados
-        $historico->save();
-
-        Log::info('Histórico salvo:', $historico->toArray());
-
-        return response()->json(['message' => 'Data salva com sucesso!']);
-    } catch (\Exception $e) {
-        Log::error('Erro ao salvar:', ['error' => $e->getMessage()]);
-
-        return response()->json(['message' => 'Erro ao salvar a data.', 'error' => $e->getMessage()], 500);
-    }
-}
 
 
 
@@ -161,8 +185,13 @@ public function salvarDataLeitura(Request $request)
      */
     public function show($id)
 {
-    
+    // Busca o livro pelo ID
+    $livro = Livro::findOrFail($id);
+
+    // Passa a URL do arquivo PDF diretamente
+    return view('livros.index', compact('livro'));
 }
+
 
 
 
