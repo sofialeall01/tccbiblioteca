@@ -167,15 +167,15 @@
 
 
 
-    <section id="gallery" class="gallery section">
+<section id="gallery" class="gallery section">
     <div class="container-fluid" data-aos="fade-up" data-aos-delay="100">
         <div class="row gy-4 justify-content-start">
             @forelse($livros as $livro)
                 <!-- Card de cada livro -->
                 <div class="col-xl-3 col-lg-4 col-md-6">
-                    <div class="gallery-item h-100" style="width: 200px;">
+                    <div class="gallery-item h-100">
                         <!-- Exibindo a capa do livro -->
-                        <img src="{{ asset('storage/' . $livro->fotoCapa) }}" class="img-fluid" style="width: 200px; height: auto;">
+                        <img src="{{ asset('storage/' . $livro->fotoCapa) }}" class="img-fluid" style="width: 100%; height: auto; max-width: 200px;">
 
                         <!-- Links de ação -->
                         <div class="gallery-links d-flex align-items-center justify-content-center">
@@ -193,8 +193,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
                                         </div>
                                         <div class="modal-body">
-                                        <iframe src="{{ asset('storage/arquivos/' . $livro->arquivo) }}" style="width: 100%; height: 80vh;" frameborder="0"></iframe>
-
+                                            <iframe src="{{ asset('storage/arquivos/' . $livro->arquivo) }}" style="width: 100%; height: 80vh;" frameborder="0"></iframe>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: black; color: rgb(92, 201, 201); border: 1px solid white;">Fechar</button>
@@ -202,13 +201,13 @@
                                     </div>
                                 </div>
                             </div>
-                          
-                    <!-- Link para edição -->
-                    <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal({{ $livro->id }})">
-                    <i class="bi bi-pencil-square"></i>
-                </a>
+
+                            <!-- Link para edição -->
+                            <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal({{ $livro->id }})">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
    
-             <!-- Formulário para remoção -->
+                            <!-- Formulário para remoção -->
                             <form action="{{ route('livros.destroy', $livro->id) }}" method="POST" style="display: inline;" id="deleteForm{{ $livro->id }}">
                                 @csrf
                                 @method('DELETE')
@@ -227,50 +226,51 @@
 
                 <!-- Modal de informações -->
                 <div class="modal fade" id="infoModal{{ $livro->id }}" tabindex="-1" aria-labelledby="infoModalLabel{{ $livro->id }}" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content" style="background-color: black; color: white;">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="infoModalLabel{{ $livro->id }}">Informações do Livro</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p><strong>Título:</strong> {{ $livro->titulo }}</p>
-                            @if($livro->autores->isNotEmpty())
-                                <p><strong>Autores:</strong> {{ $livro->autores->pluck('nome')->join(', ') }}</p>
-                            @else
-                                <p><strong>Autores:</strong> Nenhum autor cadastrado.</p>
-                            @endif
-                            <p><strong>Número de Páginas:</strong> {{ $livro->numero_paginas }}</p>
-                            
-                            <!-- Campo para Data de Início -->
-                        <!-- Campo para Data de Início -->
-                                                    
-                        <<div class="mb-3">
-                                  <label for="inputDataInicio" class="form-label">Data de Início: </label>
-                                  <input type="date" id="inputDataInicio" class="form-control" />
-                                  <button id="btnSalvarInicio" data-livro-id="{{ $livro->id }}" class="btn btn-success mt-2">
-                                      <i class="fa fa-check icone-certo"></i> 
-                                  </button>
-                              </div>
-
-                              
-                              <div class="mb-3">
-                                  <label for="inputDataFim" class="form-label">Data de Fim:  </label>
-                                  <input type="date" id="inputDataFim" class="form-control" />
-                                  <button id="btnSalvarFim" data-livro-id="{{ $livro->id }}" class="btn btn-success mt-2">
-                                      <i class="fa fa-check icone-certo"></i> 
-                                  </button>
-                              </div>
-                          </div> 
+                    <div class="modal-dialog">
+                        <div class="modal-content" style="background-color: black; color: white;">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="infoModalLabel{{ $livro->id }}">Informações do Livro</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Título:</strong> {{ $livro->titulo }}</p>
+                                @if($livro->autores->isNotEmpty())
+                                    <p><strong>Autores:</strong> {{ $livro->autores->pluck('nome')->join(', ') }}</p>
+                                @else
+                                    <p><strong>Autores:</strong> Nenhum autor cadastrado.</p>
+                                @endif
+                                <p><strong>Número de Páginas:</strong> {{ $livro->numero_paginas }}</p>
+                                <div
 
 
 
-                            <!-- Exibir mensagens de sucesso ou erro -->
-                            <div id="mensagem{{ $livro->id }}" class="alert d-none"></div>
+            <div class="mb-3">
+            <label for="inputDataInicio" class="form-label">Data de Início</label>
+            <input type="date" id="inputDataInicio" class="form-control"
+                value="{{ old('data_inicio_leitura', isset($historicos[$livro->id]) ? $historicos[$livro->id]->data_inicio_leitura : '') }}" />
+            <button id="btnSalvarInicio" data-livro-id="{{ $livro->id }}" class="btn btn-success mt-2">
+                <i class="fa fa-check icone-certo"></i> 
+            </button>
+        </div>
+
+        <!-- Exibir Data de Fim -->
+        <div class="mb-3">
+            <label for="inputDataFim" class="form-label">Data de Fim</label>
+            <input type="date" id="inputDataFim" class="form-control"
+                value="{{ old('data_fim_leitura', isset($historicos[$livro->id]) ? $historicos[$livro->id]->data_fim_leitura : '') }}" />
+            <button id="btnSalvarFim" data-livro-id="{{ $livro->id }}" class="btn btn-success mt-2">
+                <i class="fa fa-check icone-certo"></i> 
+            </button>
+        </div>
+    </div>
+                               
+                               
+                                <!-- Mensagens de Sucesso ou Erro -->
+                                <div id="mensagem{{ $livro->id }}" class="alert d-none"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
             @empty
                 <div class="col-12 text-center">
@@ -281,7 +281,6 @@
     </div>
 </section>
 
-    
     <script>
               //excluirlivro
           document.querySelectorAll('.delete-link').forEach(button => {
@@ -333,52 +332,53 @@
             });
         });
 
-        ///script para as datas
-        $('#btnSalvarInicio').on('click', function () {
-          let livroId = $(this).data('livro-id');
-          let dataInicio = $('#inputDataInicio').val();
+      // Salvando Data de Início
+$(document).on('click', '[id^="btnSalvarInicio_"]', function () {
+    let livroId = $(this).data('livro-id'); // Pega o ID do livro associado
+    let dataInicio = $(`#inputDataInicio_${livroId}`).val(); // Captura o valor da data de início
 
-          $.ajax({
-              url: '/historico/salvar',
-              method: 'POST',
-              data: {
-                  livro_id: livroId,
-                  data_inicio_leitura: dataInicio,
-                  _token: $('meta[name="csrf-token"]').attr('content'),
-              },
-              success: function (response) {
-                  alert(response.message); // Mensagem de sucesso
-              },
-              error: function (xhr) {
-                  alert('Erro ao salvar data de início: ' + xhr.responseJSON.message);
-              }
-          });
-      });
+    $.ajax({
+        url: '/historico/salvar',
+        method: 'POST',
+        data: {
+            livro_id: livroId,
+            data_inicio_leitura: dataInicio,
+            _token: $('meta[name="csrf-token"]').attr('content'),
+        },
+        success: function (response) {
+            alert(response.message); // Exibe mensagem de sucesso
+            location.reload(); // Recarrega a página para atualizar os dados
+        },
+        error: function (xhr) {
+            alert('Erro ao salvar data de início: ' + (xhr.responseJSON?.message || 'Erro desconhecido.'));
+        }
+    });
+});
 
-      $('#btnSalvarFim').on('click', function () {
-          let livroId = $(this).data('livro-id');
-          let dataFim = $('#inputDataFim').val();
+// Salvando Data de Fim
+$(document).on('click', '[id^="btnSalvarFim_"]', function () {
+    let livroId = $(this).data('livro-id'); // Pega o ID do livro associado
+    let dataFim = $(`#inputDataFim_${livroId}`).val(); // Captura o valor da data de fim
 
-          $.ajax({
-              url: '/historico/salvar',
-              method: 'POST',
-              data: {
-                  livro_id: livroId,
-                  data_fim_leitura: dataFim,
-                  _token: $('meta[name="csrf-token"]').attr('content'),
-              },
-              success: function (response) {
-                  alert(response.message); // Mensagem de sucesso
-              },
-              error: function (xhr) {
-                  alert('Erro ao salvar data de fim: ' + xhr.responseJSON.message);
-              }
-          });
-      });
+    $.ajax({
+        url: '/historico/salvar',
+        method: 'POST',
+        data: {
+            livro_id: livroId,
+            data_fim_leitura: dataFim,
+            _token: $('meta[name="csrf-token"]').attr('content'),
+        },
+        success: function (response) {
+            alert(response.message); // Exibe mensagem de sucesso
+            location.reload(); // Recarrega a página para atualizar os dados
+        },
+        error: function (xhr) {
+            alert('Erro ao salvar data de fim: ' + (xhr.responseJSON?.message || 'Erro desconhecido.'));
+        }
+    });
+});
 
-
-
-                      </script>
+      </script>
 </section>
 
 

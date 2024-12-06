@@ -16,8 +16,7 @@ class LivroController extends Controller
      */
     public function index()
     {
-          // Passa a variável livros para a view
-          if (!auth()->check()) {
+        if (!auth()->check()) {
             return redirect()->route('login');  // Se o usuário não estiver logado, redireciona para login
         }
     
@@ -34,6 +33,10 @@ class LivroController extends Controller
     
         return view('biblioteca', compact('livros', 'historicos'));
     }
+    
+
+    
+
     
     
 
@@ -62,19 +65,29 @@ class LivroController extends Controller
         
         
 
+       
+
+        
+
+
+
+    /**
+     * Show the form for creating a new resource.
+     */
+
 public function salvarDataLeitura(Request $request)
 {
-    Log::info('Recebido no controlador:', $request->all());
+    Log::info('Dados recebidos:', $request->all());
 
     try {
-        // Valida os dados, mas permite que cada campo seja opcional
+        // Valida os dados recebidos
         $validated = $request->validate([
-            'livro_id' => 'required|exists:livro,id', // Valida o ID do livro
-            'data_inicio_leitura' => 'nullable|date', // Permite data de início opcional
-            'data_fim_leitura' => 'nullable|date',    // Permite data de fim opcional
+            'livro_id' => 'required|exists:livros,id', // Valida que o livro existe na tabela 'livros'
+            'data_inicio_leitura' => 'nullable|date', // Permite campo vazio ou uma data válida
+            'data_fim_leitura' => 'nullable|date',    // Permite campo vazio ou uma data válida
         ]);
 
-        // Busca ou cria o histórico do livro para o usuário logado
+        // Busca ou cria um histórico para o usuário logado e o livro especificado
         $historico = \App\Models\Historico::firstOrCreate(
             [
                 'user_id' => Auth::id(),
@@ -82,7 +95,7 @@ public function salvarDataLeitura(Request $request)
             ]
         );
 
-        // Atualiza os campos individualmente, sem dependência
+        // Atualiza os campos de data de início e fim, se fornecidos
         if (!empty($validated['data_inicio_leitura'])) {
             $historico->data_inicio_leitura = $validated['data_inicio_leitura'];
         }
@@ -91,24 +104,24 @@ public function salvarDataLeitura(Request $request)
             $historico->data_fim_leitura = $validated['data_fim_leitura'];
         }
 
-        // Salva as alterações no banco de dados
+        // Salva o histórico no banco de dados
         $historico->save();
 
-        Log::info('Histórico salvo:', $historico->toArray());
+        Log::info('Histórico salvo com sucesso:', $historico->toArray());
 
-        return response()->json(['message' => 'Data salva com sucesso!']);
+        // Retorna resposta JSON de sucesso
+        return response()->json(['message' => 'Data salva com sucesso!'], 200);
     } catch (\Exception $e) {
-        Log::error('Erro ao salvar:', ['error' => $e->getMessage()]);
+        // Log do erro e resposta JSON de erro
+        Log::error('Erro ao salvar histórico:', ['error' => $e->getMessage()]);
 
-        return response()->json(['message' => 'Erro ao salvar a data.', 'error' => $e->getMessage()], 500);
+        return response()->json([
+            'message' => 'Erro ao salvar a data.',
+            'error' => $e->getMessage()
+        ], 500);
     }
 }
 
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
