@@ -31,6 +31,7 @@ Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros
 Route::get('/buscar', [LivroController::class, 'buscar'])->name('livros.buscar');
 Route::post('/historico/salvar', [LivroController::class, 'salvarDataLeitura']);
 Route::get('/livro/{id}', [LivroController::class, 'show']);
+Route::get('/livros/{id}/pdf', [LivroController::class, 'getPdf'])->name('livros.getPdf');
 
 
 Route::get('/', function () {

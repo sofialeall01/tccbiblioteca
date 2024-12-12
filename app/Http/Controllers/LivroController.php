@@ -11,12 +11,37 @@ use Storage;
 
 class LivroController extends Controller
 {
+    public function getPdf($id)
+{
+    try {
+        // Busca o livro pelo ID
+        $livro = Livro::findOrFail($id);
+
+        // Verifica se o arquivo do livro existe
+        if (!$livro->arquivo) {
+            return response()->json(['success' => false, 'message' => 'Arquivo PDF não encontrado.']);
+        }
+
+        // Monta a URL completa do PDF
+        $pdfUrl = asset('storage/arquivos/' . $livro->arquivo);
+
+        return response()->json([
+            'success' => true,
+            'titulo' => $livro->titulo,
+            'pdfUrl' => $pdfUrl,
+        ]);
+    } catch (Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Erro ao buscar o livro.']);
+    }
+}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        if (!auth()->check()) {
+          // Passa a variável livros para a view
+          if (!auth()->check()) {
             return redirect()->route('login');  // Se o usuário não estiver logado, redireciona para login
         }
     
@@ -33,10 +58,6 @@ class LivroController extends Controller
     
         return view('biblioteca', compact('livros', 'historicos'));
     }
-    
-
-    
-
     
     
 
@@ -65,29 +86,19 @@ class LivroController extends Controller
         
         
 
-       
-
-        
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-
 public function salvarDataLeitura(Request $request)
 {
-    Log::info('Dados recebidos:', $request->all());
+    Log::info('Recebido no controlador:', $request->all());
 
     try {
-        // Valida os dados recebidos
+        // Valida os dados, mas permite que cada campo seja opcional
         $validated = $request->validate([
-            'livro_id' => 'required|exists:livros,id', // Valida que o livro existe na tabela 'livros'
-            'data_inicio_leitura' => 'nullable|date', // Permite campo vazio ou uma data válida
-            'data_fim_leitura' => 'nullable|date',    // Permite campo vazio ou uma data válida
+            'livro_id' => 'required|exists:livro,id', // Valida o ID do livro
+            'data_inicio_leitura' => 'nullable|date', // Permite data de início opcional
+            'data_fim_leitura' => 'nullable|date',    // Permite data de fim opcional
         ]);
 
-        // Busca ou cria um histórico para o usuário logado e o livro especificado
+        // Busca ou cria o histórico do livro para o usuário logado
         $historico = \App\Models\Historico::firstOrCreate(
             [
                 'user_id' => Auth::id(),
@@ -95,30 +106,25 @@ public function salvarDataLeitura(Request $request)
             ]
         );
 
-        // Atualiza os campos de data de início e fim, se fornecidos
+        // Atualiza os campos individualmente, sem dependência
         if (!empty($validated['data_inicio_leitura'])) {
             $historico->data_inicio_leitura = $validated['data_inicio_leitura'];
         }
 
-        if (!empty($validated['data_fim_leitura'])) {
-            $historico->data_fim_leitura = $validated['data_fim_leitura'];
-        }
+                if (!empty($validated['data_fim_leitura'])) {
+                    $historico->data_fim_leitura = $validated['data_fim_leitura'];
+                }
 
-        // Salva o histórico no banco de dados
+        // Salva as alterações no banco de dados
         $historico->save();
 
-        Log::info('Histórico salvo com sucesso:', $historico->toArray());
+        Log::info('Histórico salvo:', $historico->toArray());
 
-        // Retorna resposta JSON de sucesso
-        return response()->json(['message' => 'Data salva com sucesso!'], 200);
+        return response()->json(['message' => 'Data salva com sucesso!']);
     } catch (\Exception $e) {
-        // Log do erro e resposta JSON de erro
-        Log::error('Erro ao salvar histórico:', ['error' => $e->getMessage()]);
+        Log::error('Erro ao salvar:', ['error' => $e->getMessage()]);
 
-        return response()->json([
-            'message' => 'Erro ao salvar a data.',
-            'error' => $e->getMessage()
-        ], 500);
+        return response()->json(['message' => 'Erro ao salvar a data.', 'error' => $e->getMessage()], 500);
     }
 }
 
@@ -174,8 +180,13 @@ public function salvarDataLeitura(Request $request)
      */
     public function show($id)
 {
-    
+    // Busca o livro pelo ID
+    $livro = Livro::findOrFail($id);
+
+    // Passa a URL do arquivo PDF diretamente
+    return view('livros.index', compact('livro'));
 }
+
 
 
 
@@ -189,9 +200,49 @@ public function salvarDataLeitura(Request $request)
 
 
 
-public function update(Request $request, $id)
+public function update(Request $request)
 {
+    $request->validate([
+        'id' => 'required|exists:livros,id',
+        'titulo' => 'nullable|string|max:255',
+        'numeroPaginas' => 'nullable|integer',
+        'arquivo' => 'nullable|file|mimes:pdf',
+        'fotoCapa' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'autores' => 'nullable|array',
+        'autores.*' => 'nullable|string|max:255'
+    ]);
+
+    $livro = Livro::findOrFail($request->id);
+
+    if ($request->filled('titulo')) {
+        $livro->titulo = $request->titulo;
+    }
+
+    if ($request->filled('numero_paginas')) {
+        $livro->numero_paginas = $request->numero_paginas;
+    }
+
+    if ($request->hasFile('arquivo')) {
+        $livro->arquivo = $request->file('arquivo')->store('arquivos', 'public');
+    }
+
+    if ($request->hasFile('fotoCapa')) {
+        $livro->fotoCapa = $request->file('fotoCapa')->store('capas', 'public');
+    }
+
+    $livro->save();
+
+    if ($request->filled('autores')) {
+        $livro->autores()->detach(); // Remove autores antigos
+        foreach ($request->autores as $autorNome) {
+            $autor = Autor::firstOrCreate(['nome' => $autorNome]);
+            $livro->autores()->attach($autor->id);
+        }
+    }
+
+    return response()->json(['message' => 'Livro editado com sucesso!']);
 }
+
 
 
     
