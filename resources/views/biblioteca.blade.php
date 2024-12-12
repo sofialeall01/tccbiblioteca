@@ -30,12 +30,14 @@
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- PDF.js (Apenas a versão 2.16.105) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+</script>
 
-
-
-  
 
   <!-- Main CSS File -->
   <link href="{{asset('tema/assets/css/main.css')}}" rel="stylesheet">
@@ -165,37 +167,124 @@
                         <!-- Links de ação -->
                         <div class="gallery-links d-flex align-items-center justify-content-center">
                             <!-- Link para visualizar o PDF -->
-                            <!-- Ícone para expandir o PDF -->
-                    <!-- Ícone de Expandir PDF -->
-                    <a href="#" title="{{ $livro->id }}" class="preview-link" data-bs-toggle="modal" data-bs-target="#pdfModal{{ $livro->id }}">
-                    <i class="bi bi-arrows-angle-expand" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#pdfModal{{ $livro->id }}"
-                    data-pdf-url="{{ asset('storage/' . $livro->arquivo) }}">
-                    </i>
-                    </a>
 
-                    <!-- Modal para Exibir o PDF -->
-                    <div class="modal fade" id="pdfModal{{ $livro->id }}" tabindex="-1" aria-labelledby="modalLabel{{ $livro->id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalLabel{{ $livro->id }}">Visualizando: {{ $livro->titulo }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <canvas id="canvas{{ $livro->id }}" width="600" height="780" style="border: 1px solid black;"></canvas>
-                            </div>
+ <!-- Link para Expandir PDF -->
+<a href="#" 
+   class="preview-link" 
+   data-bs-toggle="modal" 
+   data-bs-target="#pdfModal{{ $livro->id }}" 
+   data-pdf-url="{{ asset('storage/' . $livro->arquivo) }}" 
+   data-livro-id="{{ $livro->id }}">
+    <i class="bi bi-arrows-angle-expand"></i>
+</a>
+
+<!-- Modal para Exibir o PDF -->
+<div class="modal fade" id="pdfModal{{ $livro->id }}" tabindex="-1" aria-labelledby="modalLabel{{ $livro->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel{{ $livro->id }}">Visualizando: {{ $livro->titulo }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="pdf-canvas{{ $livro->id }}" style="border: 1px solid black; width: 100%; height: auto;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Botão para abrir o modal -->
+    <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal({{ $livro->id }})">
+        <i class="bi bi-pencil-square"></i>
+    </a>
+
+    <!-- Modal correspondente ao livro -->
+    <div class="modal fade" id="editLivroModal-{{ $livro->id }}" tabindex="-1" aria-labelledby="editLivroModalLabel-{{ $livro->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editLivroModalLabel-{{ $livro->id }}">Editar Livro - {{ $livro->titulo }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <form id="editarLivroForm" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" id="livroId" name="id">
+                    <div class="mb-3">
+                        <label for="editTitulo" class="form-label" style="color:white;">Título</label>
+                        <input type="text" class="form-control" id="editTitulo" name="titulo" style="background-color: black; color: white;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editNumeroPaginas" class="form-label" style="color:white;">Número de Páginas</label>
+                        <input type="number" class="form-control" id="editNumeroPaginas" name="numero_paginas" style="background-color: black; color: white;">
+                    </div>
+                    <div class="mb-3" id="editAuthorsSection">
+                        <label for="editAutores" class="form-label" style="color:white;">Autor(es)</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" name="autores[]" style="background-color: black; color: white;">
+                            <button type="button" class="btn btn-custom" onclick="addEditAuthorField()">+</button>
                         </div>
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <label for="editArquivo" class="form-label" style="color:white;">Arquivo (PDF)</label>
+                        <input type="file" class="form-control" id="editArquivo" name="arquivo" accept=".pdf" style="background-color: black; color: white;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editFotoCapa" class="form-label" style="color:white;">Capa do Livro</label>
+                        <input type="file" class="form-control" id="editFotoCapa" name="fotoCapa" accept="image/*" style="background-color: black; color: white;">
+                    </div>
+                    <div class="mb-3 text-center">
+                        <button type="submit" class="btn btn-primary" style="background-color: black; color: rgb(92, 201, 201); border: 1px solid white;">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
 
 
+<script>
+    function openEditModal(livroId) {
+    // Identifica o modal pelo ID do livro
+    const modalId = `editLivroModal-${livroId}`;
+    const modalElement = document.getElementById(modalId);
 
-                            <!-- Link para edição -->
-                            <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal({{ $livro->id }})">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
+    if (modalElement) {
+        // Inicializa e exibe o modal correspondente
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    } else {
+        console.error(`Modal com ID ${modalId} não encontrado.`);
+    }
+}
+function saveLivro(livroId) {
+    // Obtém os valores dos campos do modal
+    const titulo = document.getElementById(`editTitulo-${livroId}`).value;
+    const numeroPaginas = document.getElementById(`editNumeroPaginas-${livroId}`).value;
+
+    // Faz a requisição para salvar os dados
+    fetch(`/livros/${livroId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ titulo, numero_paginas: numeroPaginas })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Livro atualizado com sucesso!');
+                location.reload(); // Atualiza a página (opcional)
+            } else {
+                alert('Erro ao atualizar o livro.');
+            }
+        })
+        .catch(error => console.error('Erro ao salvar os dados:', error));
+}
+
+</script>
+
 
                             <!-- Formulário para remoção -->
                             <form action="{{ route('livros.destroy', $livro->id) }}" method="POST" style="display: inline;" id="deleteForm{{ $livro->id }}">
@@ -272,76 +361,77 @@
     
     
 <script>
-    // Defina o caminho do worker do PDF.js
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+  // Configuração do caminho do PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    // Variáveis globais
-    let pdfDoc = null;
-    let currentRenderTask = null; // Para rastrear a renderização ativa
-    let currentCanvasId = null; // Para rastrear o canvas ativo
-
-    // Função para carregar e renderizar o PDF
-    async function renderPDF(pdfUrl, canvasId) {
-        const canvas = document.getElementById(canvasId);
-
-        if (!canvas) {
-            console.error("Canvas não encontrado: " + canvasId);
-            return;
-        }
-
-        const ctx = canvas.getContext("2d");
-
-        try {
-            // Cancela a tarefa anterior, se houver
-            if (currentRenderTask) {
-                currentRenderTask.cancel();
-            }
-
-            // Carrega o documento PDF
-            if (!pdfDoc || currentCanvasId !== canvasId) {
-                pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
-                currentCanvasId = canvasId;
-            }
-
-            // Pega a primeira página
-            const page = await pdfDoc.getPage(1);
-
-            // Configurações de escala e tamanho
-            const viewport = page.getViewport({ scale: 1.5 });
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-
-            // Parâmetros de renderização
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport,
-            };
-
-            // Renderiza a nova página
-            currentRenderTask = page.render(renderContext);
-            await currentRenderTask.promise;
-
-            console.log("PDF renderizado no canvas: " + canvasId);
-        } catch (error) {
-            if (error.name === "RenderingCancelledException") {
-                console.log("Renderização cancelada.");
-            } else {
-                console.error("Erro ao carregar/renderizar PDF:", error);
-            }
-        }
+// Função para carregar e renderizar o PDF
+async function renderPDF(pdfUrl, canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error("Canvas não encontrado: " + canvasId);
+        return;
     }
 
-    // Função para abrir o modal e carregar o PDF
-    $(document).on("click", ".preview-link", function (event) {
-        const livroId = $(this).data("livro-id");
-        const pdfUrl = $(this).data("pdf-url");
+    const ctx = canvas.getContext("2d");
+
+    try {
+        // Carrega o documento PDF
+        const pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
+        console.log('PDF carregado:', pdfDoc);
+
+        // Pega a primeira página
+        const page = await pdfDoc.getPage(1);
+        console.log('Página carregada:', page);
+
+        // Configurações de escala e tamanho
+        const viewport = page.getViewport({ scale: 1.5 });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // Parâmetros de renderização
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport,
+        };
+
+        // Renderiza a página
+        await page.render(renderContext).promise;
+        console.log("PDF renderizado no canvas: " + canvasId);
+    } catch (error) {
+        console.error("Erro ao carregar/renderizar PDF:", error);
+    }
+}
+
+// Função para garantir que o PDF seja renderizado quando o modal for mostrado
+function setupModalRender(event) {
+    const trigger = event.target.closest(".preview-link");
+    if (trigger) {
+        event.preventDefault();
+
+        const livroId = trigger.getAttribute("data-livro-id");
+        const pdfUrl = trigger.getAttribute("data-pdf-url");
         const canvasId = "pdf-canvas" + livroId;
 
-        // Aguarda o modal ser exibido
-        $("#pdfModal" + livroId).on("shown.bs.modal", function () {
-            renderPDF(pdfUrl, canvasId);
-        });
-    });
+        // Localiza o modal correspondente ao livro
+        const modal = document.getElementById("pdfModal" + livroId);
+        console.log("Modal encontrado: ", modal);
+
+        // Adiciona o evento para renderizar o PDF assim que o modal for exibido
+        modal.addEventListener('shown.bs.modal', function () {
+            // Atraso para garantir que o modal tenha sido exibido
+            setTimeout(() => {
+                renderPDF(pdfUrl, canvasId);
+            }, 100);
+        }, { once: true });
+
+        // Exibe o modal usando o Bootstrap
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+    }
+}
+
+// Vincula o evento de clique ao link de visualização
+document.addEventListener("click", setupModalRender);
 
     // Exclusão de livro com confirmação
     document.querySelectorAll(".delete-link").forEach((button) => {

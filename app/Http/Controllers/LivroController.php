@@ -205,9 +205,49 @@ class LivroController extends Controller
 
 
 
-public function update(Request $request, $id)
+public function update(Request $request)
 {
+    $request->validate([
+        'id' => 'required|exists:livros,id',
+        'titulo' => 'nullable|string|max:255',
+        'numeroPaginas' => 'nullable|integer',
+        'arquivo' => 'nullable|file|mimes:pdf',
+        'fotoCapa' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'autores' => 'nullable|array',
+        'autores.*' => 'nullable|string|max:255'
+    ]);
+
+    $livro = Livro::findOrFail($request->id);
+
+    if ($request->filled('titulo')) {
+        $livro->titulo = $request->titulo;
+    }
+
+    if ($request->filled('numero_paginas')) {
+        $livro->numero_paginas = $request->numero_paginas;
+    }
+
+    if ($request->hasFile('arquivo')) {
+        $livro->arquivo = $request->file('arquivo')->store('arquivos', 'public');
+    }
+
+    if ($request->hasFile('fotoCapa')) {
+        $livro->fotoCapa = $request->file('fotoCapa')->store('capas', 'public');
+    }
+
+    $livro->save();
+
+    if ($request->filled('autores')) {
+        $livro->autores()->detach(); // Remove autores antigos
+        foreach ($request->autores as $autorNome) {
+            $autor = Autor::firstOrCreate(['nome' => $autorNome]);
+            $livro->autores()->attach($autor->id);
+        }
+    }
+
+    return response()->json(['message' => 'Livro editado com sucesso!']);
 }
+
 
 
     
