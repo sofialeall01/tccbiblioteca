@@ -33,6 +33,8 @@ Route::get('/buscar', [LivroController::class, 'buscar'])->name('livros.buscar')
 Route::post('/historico/salvar', [LivroController::class, 'salvarDataLeitura']);
 Route::get('/livro/{id}', [LivroController::class, 'show']);
 Route::get('/livros/{id}/pdf', [LivroController::class, 'getPdf'])->name('livros.getPdf');
+Route::get('/livro/exibir/{id}', [LivroController::class, 'exibir'])->name('livro.exibir');
+
 
 //rotas para sistema
 Route::post('/salvar-livro', [SistemaController::class, 'salvarLivro'])->name('salvar.livro');

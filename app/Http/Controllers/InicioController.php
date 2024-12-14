@@ -11,24 +11,23 @@ class InicioController extends Controller
 {
     public function index()
     {
-       // Busca a primeira entrada na tabela sistema
-    $sistema = Sistema::first();
+       // Obtém o usuário logado
+    $userId = auth()->id();
 
-    // Verifica se existe um sistema e se o livro_id está definido
+    // Busca a entrada na tabela sistema com o users_id do usuário logado
+    $sistema = Sistema::where('users_id', $userId)->first();
+
+    $livro = null;
+
+    // Verifica se a entrada foi encontrada e busca o livro
     if ($sistema && $sistema->livro_id) {
-        // Busca o livro correspondente ao livro_id na tabela sistema
         $livro = Livro::find($sistema->livro_id);
-    } else {
-        // Se não encontrar o livro, define uma variável livro como null
-        $livro = null;
-    }
-    // Verifica se o livro pertence ao usuário logado
-    if ($livro && $livro->user_id === Auth::id()) {
-        // Retorna a view com os dados do livro
-        return view('inicio', compact('livro'));
     }
 
     // Retorna a view com os dados do livro
     return view('inicio', compact('livro'));
 }
+
+    // Retorna a view com os dados do livro
+   
 }

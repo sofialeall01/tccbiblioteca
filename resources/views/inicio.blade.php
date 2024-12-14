@@ -96,28 +96,28 @@
         <div class="row gy-4 justify-content-center">
             <div class="col-lg-4">
                 <h1>Lendo Agora</h1>
-                <!-- Exibindo a foto de capa do livro -->
-                @if($livro && $livro->fotoCapa)
-                    <img src="{{ asset('storage/' . $livro->fotoCapa) }}" class="img-fluid" alt="Capa do livro">
-                @else
-                    <img src="{{ asset('tema/assets/img/profile-img.jpg') }}" class="img-fluid" alt="Imagem padrão">
+                @if ($livro && $livro->fotoCapa)
+                    <img src="{{ Storage::url($livro->fotoCapa) }}" class="img-fluid" alt="Capa do Livro">
+                
                 @endif
             </div>
             <div class="col-lg-5 content">
-                @if($livro)
-                    <h2>{{ $livro->titulo }}</h2>
-                    <p class="fst-italic py-3">Informações sobre sua leitura</p>
+             
+                <p class="fst-italic py-3">
+                    Informações sobre sua leitura
+                </p>
+                @if ($livro)
                     <div class="row">
                         <div class="col-lg-6">
                             <ul>
-                                <li><i class="bi bi-chevron-right"></i> Titulo: <span>{{ $livro->titulo }}</span></li>
-                                <li><i class="bi bi-chevron-right"></i> Autor: <span>{{ $livro->autor ?? 'Não disponível' }}</span></li>
-                                <li><i class="bi bi-chevron-right"></i> Número de Páginas: <span>{{ $livro->numero_paginas ?? 'Não disponível' }}</span></li>
+                                <li><i class="bi bi-chevron-right"></i> Título: <span>{{ $livro->titulo }}</span></li>
+                                <li><i class="bi bi-chevron-right"></i> Autor: <span> {{ $livro->autores->pluck('nome')->join(', ') }}</span></li>
+                                <li><i class="bi bi-chevron-right"></i> Número de páginas: <span>{{ $livro->numero_paginas }}</span></li>
                             </ul>
                         </div>
                     </div>
                 @else
-                    <h2>Nenhuma leitura ainda</h2>
+                    <p>Nenhum livro está sendo lido no momento.</p>
                 @endif
             </div>
         </div>

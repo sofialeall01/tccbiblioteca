@@ -262,4 +262,19 @@ public function update(Request $request)
 
     return response()->json(['message' => 'Livro removido com sucesso!']);
     }
+
+    public function exibir($id)
+{
+    // Busca o livro pelo ID
+    $livro = Livro::find($id);
+
+    // Verifica se o livro existe
+    if (!$livro) {
+        abort(404, 'Livro não encontrado.');
+    }
+
+    // Retorna a view com o caminho do arquivo PDF
+    return view('exibir', ['livro' => $livro]);
+}
+
 }

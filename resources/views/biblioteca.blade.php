@@ -179,11 +179,7 @@
                         <div class="gallery-links d-flex align-items-center justify-content-center">
                             <!-- Link para visualizar o PDF -->
 
-                            <a href="#" 
-   class="preview-link" 
-   data-bs-toggle="modal" 
-   data-bs-target="#pdfModal{{ $livro->id }}" 
-   data-pdf-url="{{ asset('storage/' . $livro->arquivo) }}" 
+                            <a href="{{ route('livro.exibir', ['id' => $livro->id]) }}" 
    data-livro-id="{{ $livro->id }}" 
    data-user-id="{{ Auth::id() }}" 
    id="updateLivrariaLink{{ $livro->id }}">
@@ -193,7 +189,7 @@
 
 
 <!-- Modal para Exibir o PDF -->
-<div class="modal   fade" id="pdfModal{{ $livro->id }}"  tabindex="-1" aria-hidden="true" aria-labelledby="modalLabel{{ $livro->id }}"  >
+<!-- <div class="modal   fade" id="pdfModal{{ $livro->id }}"  tabindex="-1" aria-hidden="true" aria-labelledby="modalLabel{{ $livro->id }}"  >
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -205,7 +201,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
     <!-- Botão para abrir o modal -->
     <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal({{ $livro->id }})">
         <i class="bi bi-pencil-square"></i>
