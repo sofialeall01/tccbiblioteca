@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LivroController;
+use App\Http\Controllers\SistemaController;
 
 //rpotas para abrir as pagins
 Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil');
@@ -33,6 +34,9 @@ Route::post('/historico/salvar', [LivroController::class, 'salvarDataLeitura']);
 Route::get('/livro/{id}', [LivroController::class, 'show']);
 Route::get('/livros/{id}/pdf', [LivroController::class, 'getPdf'])->name('livros.getPdf');
 
+//rotas para sistema
+Route::post('/salvar-livro', [SistemaController::class, 'salvarLivro'])->name('salvar.livro');
+Route::get('/leitura', [SistemaController::class, 'showLeitura'])->name('leitura');
 
 Route::get('/', function () {
     return view('home');

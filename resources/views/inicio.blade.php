@@ -91,52 +91,41 @@
 
 <main class="main">
 
-  <section id="hero" class="hero section">
-
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-6 text-center" data-aos="fade-up" data-aos-delay="100">
-          <h2><span>Seja </span><span class="underlight">bem vindo </span>a sua própria<span> biblioteca</span></h2>
-          <p>Continue de onde parou ou aventure-se em um novo universo literário.</p>
-          <!-- <a href="contact.html" class="btn-get-started">Available for Hire<br></a> -->
-        </div>
-      </div>
-    </div>
-
-  </section><!-- /Hero Section -->
-  <!-- About Section -->
-  <section id="about" class="about section">
-
+<section id="about" class="about section">
     <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-      <div class="row gy-4 justify-content-center">
-        <div class="col-lg-4">
-          <h1>Lendo Agora</h1>
-          <img src="{{asset('tema/assets/img/profile-img.jpg')}}" class="img-fluid" alt="">
-        </div>
-        <div class="col-lg-5 content">
-          <h2></h2>
-          <p class="fst-italic py-3">
-            Informações sobre sua leitura
-          </p>
-          <div class="row">
-            <div class="col-lg-6">
-              <ul>
-                <li><i class="bi bi-chevron-right"></i> Titulo:<span></span></li>
-                <li><i class="bi bi-chevron-right"></i> Autor: <span></span></li>
-                <li><i class="bi bi-chevron-right"></i> Numero de paginas: <span></span></li>
-
-              </ul>
+        <div class="row gy-4 justify-content-center">
+            <div class="col-lg-4">
+                <h1>Lendo Agora</h1>
+                <!-- Exibindo a foto de capa do livro -->
+                @if($livro && $livro->fotoCapa)
+                    <img src="{{ asset('storage/' . $livro->fotoCapa) }}" class="img-fluid" alt="Capa do livro">
+                @else
+                    <img src="{{ asset('tema/assets/img/profile-img.jpg') }}" class="img-fluid" alt="Imagem padrão">
+                @endif
             </div>
-           
-          </div>
-         
+            <div class="col-lg-5 content">
+                @if($livro)
+                    <h2>{{ $livro->titulo }}</h2>
+                    <p class="fst-italic py-3">Informações sobre sua leitura</p>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <ul>
+                                <li><i class="bi bi-chevron-right"></i> Titulo: <span>{{ $livro->titulo }}</span></li>
+                                <li><i class="bi bi-chevron-right"></i> Autor: <span>{{ $livro->autor ?? 'Não disponível' }}</span></li>
+                                <li><i class="bi bi-chevron-right"></i> Número de Páginas: <span>{{ $livro->numero_paginas ?? 'Não disponível' }}</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                @else
+                    <h2>Nenhuma leitura ainda</h2>
+                @endif
+            </div>
         </div>
-      </div>
-
     </div>
+</section>
 
-  </section><!-- /About Section -->
+
+<!-- /About Section -->
 
 
   <!-- Testimonials Section -->
