@@ -28,12 +28,15 @@ Route::post('/logout', [UsuarioController::class, 'logout'])->name('logout');
 Route::post('/adicionar-livro', [LivroController::class, 'store'])->name('livro.store');
 Route::get('/exibir-livro', [LivroController::class, 'index'])->name('livros.index');
 Route::put('/livros/{id}', [LivroController::class, 'update'])->name('livros.update');
+
 Route::delete('/livros/{id}', [LivroController::class, 'destroy'])->name('livros.destroy');
 Route::get('/buscar', [LivroController::class, 'buscar'])->name('livros.buscar');
 Route::post('/historico/salvar', [LivroController::class, 'salvarDataLeitura']);
 Route::get('/livro/{id}', [LivroController::class, 'show']);
 Route::get('/livros/{id}/pdf', [LivroController::class, 'getPdf'])->name('livros.getPdf');
 Route::get('/livro/exibir/{id}', [LivroController::class, 'exibir'])->name('livro.exibir');
+Route::put('/livros/{id}/update-autores', [LivroController::class, 'updateAutores'])->name('livros.update-autores');
+Route::get('/livro/mostrar/{id}', [LivroController::class, 'mostrar'])->name('livro.mostrar');
 
 
 //rotas para sistema

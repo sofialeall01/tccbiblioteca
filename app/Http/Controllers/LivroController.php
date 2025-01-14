@@ -86,47 +86,43 @@ class LivroController extends Controller
         
         
 
-public function salvarDataLeitura(Request $request)
-{
-    Log::info('Recebido no controlador:', $request->all());
-
-    try {
-        // Valida os dados, mas permite que cada campo seja opcional
-        $validated = $request->validate([
-            'livro_id' => 'required|exists:livro,id', // Valida o ID do livro
-            'data_inicio_leitura' => 'nullable|date', // Permite data de início opcional
-            'data_fim_leitura' => 'nullable|date',    // Permite data de fim opcional
-        ]);
-
-        // Busca ou cria o histórico do livro para o usuário logado
-        $historico = \App\Models\Historico::firstOrCreate(
-            [
-                'user_id' => Auth::id(),
-                'livro_id' => $validated['livro_id'],
-            ]
-        );
-
-        // Atualiza os campos individualmente, sem dependência
-        if (!empty($validated['data_inicio_leitura'])) {
-            $historico->data_inicio_leitura = $validated['data_inicio_leitura'];
-        }
-
+        public function salvarDataLeitura(Request $request)
+        {
+            Log::info('Recebido no controlador:', $request->all());
+        
+            try {
+                $validated = $request->validate([
+                    'livro_id' => 'required|exists:livro,id',
+                    'data_inicio_leitura' => 'nullable|date',
+                    'data_fim_leitura' => 'nullable|date',
+                ]);
+        
+                $historico = \App\Models\Historico::firstOrCreate(
+                    [
+                        'user_id' => Auth::id(),
+                        'livro_id' => $validated['livro_id'],
+                    ]
+                );
+        
+                if (!empty($validated['data_inicio_leitura'])) {
+                    $historico->data_inicio_leitura = $validated['data_inicio_leitura'];
+                }
+        
                 if (!empty($validated['data_fim_leitura'])) {
                     $historico->data_fim_leitura = $validated['data_fim_leitura'];
                 }
-
-        // Salva as alterações no banco de dados
-        $historico->save();
-
-        Log::info('Histórico salvo:', $historico->toArray());
-
-        return response()->json(['message' => 'Data salva com sucesso!']);
-    } catch (\Exception $e) {
-        Log::error('Erro ao salvar:', ['error' => $e->getMessage()]);
-
-        return response()->json(['message' => 'Erro ao salvar a data.', 'error' => $e->getMessage()], 500);
-    }
-}
+        
+                $historico->save();
+        
+                Log::info('Histórico salvo:', $historico->toArray());
+        
+                return response()->json(['message' => 'Data salva com sucesso!']);
+            } catch (\Exception $e) {
+                Log::error('Erro ao salvar:', ['error' => $e->getMessage()]);
+                return response()->json(['message' => 'Erro ao salvar a data.', 'error' => $e->getMessage()], 500);
+            }
+        }
+        
 
     public function create()
     {
@@ -174,6 +170,34 @@ public function salvarDataLeitura(Request $request)
         return response()->json(['message' => 'Livro adicionado com sucesso!']);
     }
     
+    public function updateAutores(Request $request, $id)
+{
+    $livro = Livro::findOrFail($id);  // Encontrar o livro pelo ID
+
+    // Valida os dados de autores
+    $request->validate([
+        'autores' => 'required|array|min:1',
+        'autores.*.id' => 'required|integer|exists:autor,id',  // Valida o ID do autor existente
+        'autores.*.nome' => 'required|string|max:255',  // Verifica o nome de cada autor
+    ]);
+
+    // Desassociar os autores antigos
+    $livro->autores()->detach();
+
+    // Associar os novos autores (os existentes)
+    foreach ($request->autores as $autor) {
+        // Atualizar o nome do autor existente
+        $existingAutor = Autor::find($autor['id']);
+        if ($existingAutor) {
+            $existingAutor->update(['nome' => $autor['nome']]);  // Atualiza o nome do autor
+            $livro->autores()->attach($existingAutor->id);  // Reassocia o autor ao livro
+        }
+    }
+
+    return response()->json(['success' => true, 'message' => 'Autores atualizados com sucesso!']);
+}
+
+
     
     /**
      * Display the specified resource.
@@ -200,19 +224,16 @@ public function salvarDataLeitura(Request $request)
 
 
 
-public function update(Request $request)
+public function update(Request $request, $id)
 {
     $request->validate([
-        'id' => 'required|exists:livros,id',
         'titulo' => 'nullable|string|max:255',
-        'numeroPaginas' => 'nullable|integer',
+        'numero_paginas' => 'nullable|integer',
         'arquivo' => 'nullable|file|mimes:pdf',
         'fotoCapa' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'autores' => 'nullable|array',
-        'autores.*' => 'nullable|string|max:255'
     ]);
 
-    $livro = Livro::findOrFail($request->id);
+    $livro = Livro::findOrFail($id);
 
     if ($request->filled('titulo')) {
         $livro->titulo = $request->titulo;
@@ -232,16 +253,9 @@ public function update(Request $request)
 
     $livro->save();
 
-    if ($request->filled('autores')) {
-        $livro->autores()->detach(); // Remove autores antigos
-        foreach ($request->autores as $autorNome) {
-            $autor = Autor::firstOrCreate(['nome' => $autorNome]);
-            $livro->autores()->attach($autor->id);
-        }
-    }
-
-    return response()->json(['message' => 'Livro editado com sucesso!']);
+    return response()->json(['message' => 'Livro atualizado com sucesso!']);
 }
+
 
 
 
@@ -276,5 +290,17 @@ public function update(Request $request)
     // Retorna a view com o caminho do arquivo PDF
     return view('exibir', ['livro' => $livro]);
 }
+public function mostrar($id)
+{
+    // Busca o livro pelo ID
+    $livro = Livro::find($id);
 
+    // Verifica se o livro existe
+    if (!$livro) {
+        abort(404, 'Livro não encontrado.');
+    }
+
+    // Retorna a view com o caminho do arquivo PDF
+    return view('mostrarPDF', ['livro' => $livro]);
+}
 }

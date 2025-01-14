@@ -110,6 +110,27 @@
         border-radius: 5px; /* Opcional, apenas para visual mais amigável */
     }
 
+  
+    .edit-btn, .save-btn {
+    background-color: black;
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+    transition: none; /* Remove o efeito de transição */
+}
+
+.edit-btn i, .save-btn i {
+    color: #20b2aa;
+}
+
+/* Evitar qualquer efeito de hover */
+.edit-btn:hover, .save-btn:hover {
+    background-color: black; /* Manter a cor de fundo preta */
+}
+
+.edit-btn:focus, .save-btn:focus {
+    outline: none; /* Remover o contorno de foco */
+}
 
 
 
@@ -179,127 +200,16 @@
                         <div class="gallery-links d-flex align-items-center justify-content-center">
                             <!-- Link para visualizar o PDF -->
 
-                            <a href="{{ route('livro.exibir', ['id' => $livro->id]) }}" 
+                            <a href="{{ route('livro.mostrar', ['id' => $livro->id]) }}" 
    data-livro-id="{{ $livro->id }}" 
    data-user-id="{{ Auth::id() }}" 
+   class="preview-link" 
    id="updateLivrariaLink{{ $livro->id }}">
-    <i class="bi bi-arrows-angle-expand"></i>
+    <i class="bi bi-arrows-angle-expand"></i> <!-- Agora o ícone está dentro de um link com a classe 'preview-link' -->
 </a>
 
 
-
-<!-- Modal para Exibir o PDF -->
-<!-- <div class="modal   fade" id="pdfModal{{ $livro->id }}"  tabindex="-1" aria-hidden="true" aria-labelledby="modalLabel{{ $livro->id }}"  >
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel{{ $livro->id }}">Visualizando: {{ $livro->titulo }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <canvas id="pdf-canvas{{ $livro->id }}" style="border: 1px solid black; width: 100%; height: auto;"></canvas>
-            </div>
-        </div>
-    </div>
-</div> -->
-    <!-- Botão para abrir o modal -->
-    <a href="javascript:void(0)" title="Editar" class="edit-link" onclick="openEditModal({{ $livro->id }})">
-        <i class="bi bi-pencil-square"></i>
-    </a>
-
-    <!-- Modal correspondente ao livro -->
-    <div class="modal fade" id="editLivroModal-{{ $livro->id }}" tabindex="-1" aria-labelledby="editLivroModalLabel-{{ $livro->id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editLivroModalLabel-{{ $livro->id }}">Editar Livro - {{ $livro->titulo }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                <form id="editarLivroForm" enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" id="livroId" name="id">
-                    <div class="mb-3">
-                        <label for="editTitulo" class="form-label" style="color:white;">Título</label>
-                        <input type="text" class="form-control" id="editTitulo" name="titulo" style="background-color: black; color: white;">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editNumeroPaginas" class="form-label" style="color:white;">Número de Páginas</label>
-                        <input type="number" class="form-control" id="editNumeroPaginas" name="numero_paginas" style="background-color: black; color: white;">
-                    </div>
-                    <div class="mb-3" id="editAuthorsSection">
-                        <label for="editAutores" class="form-label" style="color:white;">Autor(es)</label>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" name="autores[]" style="background-color: black; color: white;">
-                            <button type="button" class="btn btn-custom" onclick="addEditAuthorField()">+</button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editArquivo" class="form-label" style="color:white;">Arquivo (PDF)</label>
-                        <input type="file" class="form-control" id="editArquivo" name="arquivo" accept=".pdf" style="background-color: black; color: white;">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editFotoCapa" class="form-label" style="color:white;">Capa do Livro</label>
-                        <input type="file" class="form-control" id="editFotoCapa" name="fotoCapa" accept="image/*" style="background-color: black; color: white;">
-                    </div>
-                    <div class="mb-3 text-center">
-                        <button type="submit" class="btn btn-primary" style="background-color: black; color: rgb(92, 201, 201); border: 1px solid white;">Salvar Alterações</button>
-                    </div>
-                </form>
-            </div>
-            </div>
-        </div>
-    </div>
-
-
-
-    <script>
-        
-    </script>
-<script>
     
-
-   
-    function openEditModal(livroId) {
-    // Identifica o modal pelo ID do livro
-    const modalId = `editLivroModal-${livroId}`;
-    const modalElement = document.getElementById(modalId);
-
-    if (modalElement) {
-        // Inicializa e exibe o modal correspondente
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-    } else {
-        console.error(`Modal com ID ${modalId} não encontrado.`);
-    }
-}
-function saveLivro(livroId) {
-    // Obtém os valores dos campos do modal
-    const titulo = document.getElementById(`editTitulo-${livroId}`).value;
-    const numeroPaginas = document.getElementById(`editNumeroPaginas-${livroId}`).value;
-
-    // Faz a requisição para salvar os dados
-    fetch(`/livros/${livroId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ titulo, numero_paginas: numeroPaginas })
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Livro atualizado com sucesso!');
-                location.reload(); // Atualiza a página (opcional)
-            } else {
-                alert('Erro ao atualizar o livro.');
-            }
-        })
-        .catch(error => console.error('Erro ao salvar os dados:', error));
-}
-
-</script>
 
 
                             <!-- Formulário para remoção -->
@@ -321,21 +231,130 @@ function saveLivro(livroId) {
 
                 <!-- Modal de informações -->
                 <div class="modal fade" id="infoModal{{ $livro->id }}" tabindex="-1" aria-labelledby="infoModalLabel{{ $livro->id }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content" style="background-color: black; color: white;">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="infoModalLabel{{ $livro->id }}">Informações do Livro</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p><strong>Título:</strong> {{ $livro->titulo }}</p>
-                                @if($livro->autores->isNotEmpty())
-                                    <p><strong>Autores:</strong> {{ $livro->autores->pluck('nome')->join(', ') }}</p>
-                                @else
-                                    <p><strong>Autores:</strong> Nenhum autor cadastrado.</p>
-                                @endif
-                                <p><strong>Número de Páginas:</strong> {{ $livro->numero_paginas }}</p>
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: black; color: white;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel{{ $livro->id }}">Informações do Livro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: white;"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulário para edição -->
+                <form id="editLivroForm{{ $livro->id }}" action="{{ route('livros.update', $livro->id) }}" method="PUT" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT') <!-- Ou use PUT se for necessário -->
+                    <!-- Título -->
+                    <div class="mb-3">
+    <label for="titulo" class="form-label"><strong>Título:</strong></label>
+    <div class="d-flex align-items-center">
+        <span id="tituloSpan{{ $livro->id }}">{{ $livro->titulo }}</span>
+        <input type="text" id="tituloInput{{ $livro->id }}" class="form-control d-none" name="titulo" value="{{ $livro->titulo }}">
+        <button type="button" class="btn btn-sm btn-primary ms-2 edit-btn" onclick="toggleEdit('titulo', {{ $livro->id }})">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-success ms-2 d-none save-btn" onclick="saveEdit('titulo', {{ $livro->id }})">
+            <i class="fas fa-save"></i>
+        </button>
+    </div>
+</div>
 
+<div class="mb-3">
+    <label for="numero_paginas" class="form-label"><strong>Número de Páginas:</strong></label>
+    <div class="d-flex align-items-center">
+        <span id="numero_paginasSpan{{ $livro->id }}">{{ $livro->numero_paginas }}</span>
+        <input 
+            type="number" 
+            id="numero_paginasInput{{ $livro->id }}" 
+            class="form-control d-none" 
+            name="numero_paginas" 
+            value="{{ $livro->numero_paginas }}"
+        >
+        <button 
+            type="button" 
+            class="btn btn-sm btn-primary ms-2 edit-btn" 
+            onclick="toggleEdit('numero_paginas', {{ $livro->id }})"
+        >
+            <i class="fas fa-edit"></i>
+        </button>
+        <button 
+            type="button" 
+            class="btn btn-sm btn-success ms-2 d-none save-btn" 
+            onclick="saveEdit('numero_paginas', {{ $livro->id }})"
+        >
+            <i class="fas fa-save"></i>
+        </button>
+    </div>
+</div>
+
+
+
+<div class="mb-3">
+    <label for="autor" class="form-label"><strong>Autor(s):</strong></label>
+    <div class="d-flex align-items-center" id="authorSection{{ $livro->id }}">
+        <!-- Exibição dos autores -->
+        <span id="autorSpan{{ $livro->id }}">
+            {{ $livro->autores->pluck('nome')->join(', ') }}
+        </span>
+
+        <!-- Campos de input para edição dos autores -->
+        <div id="autorInputs{{ $livro->id }}" class="d-none">
+            <!-- Adiciona inputs dinamicamente para cada autor -->
+            @foreach ($livro->autores as $autor)
+    <input type="text" name="autores[{{ $autor->id }}]" 
+           value="{{ $autor->nome }}" 
+           class="form-control mb-2" 
+           data-id="{{ $autor->id }}">
+@endforeach
+
+        </div>
+
+        <!-- Botão para alternar entre exibição e edição -->
+        <button type="button" class="btn btn-sm btn-primary ms-2 edit-btn" 
+                onclick="toggleEditAuthors({{ $livro->id }})">
+            <i class="fas fa-edit"></i>
+        </button>
+
+        <!-- Botão para salvar alterações -->
+        <button type="button" class="btn btn-sm btn-success ms-2 d-none save-btn" 
+                onclick="saveAuthorsEdit({{ $livro->id }})">
+            <i class="fas fa-save"></i>
+        </button>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label for="arquivo" class="form-label"><strong>Arquivo:</strong></label>
+    <div class="d-flex align-items-center">
+        <span id="arquivoSpan{{ $livro->id }}">
+            {{ $livro->arquivo ? 'Arquivo disponível' : 'Nenhum arquivo disponível' }}
+        </span>
+        <input type="file" id="arquivoInput{{ $livro->id }}" class="form-control d-none" name="arquivo" accept="application/pdf">
+        <button type="button" class="btn btn-sm btn-primary ms-2 edit-btn" onclick="toggleEdit('arquivo', {{ $livro->id }})">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-success ms-2 d-none save-btn" onclick="saveEdit('arquivo', {{ $livro->id }})">
+            <i class="fas fa-save"></i>
+        </button>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label for="fotoCapa" class="form-label"><strong>Foto da Capa :</strong></label>
+    <div class="d-flex align-items-center">
+        <span id="fotoCapaSpan{{ $livro->id }}">
+            {{ $livro->fotoCapa ? 'Foto disponível' : 'Nenhuma foto disponível' }}
+        </span>
+        <input type="file" id="fotoCapaInput{{ $livro->id }}" class="form-control d-none" name="fotoCapa" accept="image/jpeg, image/png, image/jpg">
+        <button type="button" class="btn btn-sm btn-primary ms-2 edit-btn" onclick="toggleEdit('fotoCapa', {{ $livro->id }})">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-success ms-2 d-none save-btn" onclick="saveEdit('fotoCapa', {{ $livro->id }})">
+            <i class="fas fa-save"></i>
+        </button>
+    </div>
+</div>
+
+
+                </form>
                                 <!-- Campo para Data de Início -->
                                 <div class="mb-3">
                                     <label for="inputDataInicio" class="form-label">Data de Início</label>
@@ -370,116 +389,215 @@ function saveLivro(livroId) {
         </div>
     </div>
 </section>
+<script>
+    function toggleEditAuthors(id) {
+    const authorInputs = document.querySelectorAll(`#autorInputs${id} input[name^="autores"]`);
+
+    authorInputs.forEach(input => {
+        console.log("Autor ID:", input.dataset.id);  // Verifique o ID do autor no console
+    });
+
+    // Obtém os autores separados por vírgula
+    const authors = document.getElementById(`autorSpan${id}`).innerText.split(', ');
+
+    const authorSection = document.getElementById(`authorSection${id}`);
+    const authorInputsDiv = document.getElementById(`autorInputs${id}`);
+    const editButton = authorSection.querySelector('.edit-btn');
+    const saveButton = authorSection.querySelector('.save-btn');
+    
+    // Alterna entre exibição e edição
+    if (authorInputsDiv.classList.contains('d-none')) {
+        // Exibe os campos de edição
+        authorInputsDiv.classList.remove('d-none');
+        editButton.classList.add('d-none');
+        saveButton.classList.remove('d-none');
+
+        // Limpa os campos existentes
+        authorInputsDiv.innerHTML = '';
+
+        // Preenche os campos com os autores separados
+        authors.forEach((author, index) => {
+            const inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group', 'mb-2');
+            
+            // Criação do campo input para o autor
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.classList.add('form-control');
+            input.name = `autores[${index}]`;
+            input.value = author; // Atribui o nome do autor
+            input.required = true;
+            input.style.backgroundColor = 'black';
+            input.style.color = 'white';
+            input.dataset.id = index + 1;  // Exemplo de atribuição de ID dinâmico, substitua conforme necessário
+
+            // Adiciona apenas o campo de input (sem o botão de remoção)
+            inputGroup.appendChild(input);
+            authorInputsDiv.appendChild(inputGroup);
+        });
+    } else {
+        // Retorna à exibição normal
+        authorInputsDiv.classList.add('d-none');
+        editButton.classList.remove('d-none');
+        saveButton.classList.add('d-none');
+    }
+}
+
+function saveAuthorsEdit(id) {
+    console.log(`Livro ID: ${id}`);
+    
+    const authorInputs = document.querySelectorAll(`#autorInputs${id} input[name^="autores"]`);
+    console.log(authorInputs); // Mostra todos os inputs encontrados
+    
+    const authors = Array.from(authorInputs).map(input => {
+        console.log(`Input ID: ${input.dataset.id}, Nome: ${input.value.trim()}`);
+        return {
+            id: input.dataset.id,  // O ID do autor que já está na tabela "autor"
+            nome: input.value.trim()  // Nome do autor que será atualizado
+        };
+    });
+
+    console.log('Autores extraídos:', authors);
+
+    // Verifique se há dados válidos
+    if (authors.length === 0 || authors.some(a => !a.nome)) {
+        alert('Todos os campos de autores devem ser preenchidos.');
+        return;
+    }
+
+    // Envia os dados via AJAX para o backend
+    fetch(`/livros/${id}/update-autores`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: JSON.stringify({ autores: authors }), // Transforma o array em JSON
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro ao atualizar os autores.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Autores atualizados com sucesso!');
+            // Atualiza a exibição dos autores editados
+            document.getElementById(`autorSpan${id}`).innerText = authors.map(a => a.nome).join(', ');
+            toggleEditAuthors(id);
+
+            // Recarrega a página após o sucesso
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erro ao atualizar os autores.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Houve um erro ao tentar salvar os autores.');
+    });
+}
+
+</script>
+<script>
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Função para alternar entre edição e visualização
+    function toggleEdit(field, id) {
+        document.getElementById(`${field}Span${id}`).classList.toggle('d-none');
+        document.getElementById(`${field}Input${id}`).classList.toggle('d-none');
+        const editButton = document.querySelector(`#${field}Span${id} ~ .edit-btn`);
+        const saveButton = document.querySelector(`#${field}Input${id} ~ .save-btn`);
+        if (editButton && saveButton) {
+            editButton.classList.toggle('d-none');
+            saveButton.classList.toggle('d-none');
+        }
+    }
+
+    // Função para salvar a edição
+    // Função para salvar as alterações via AJAX
+    function saveEdit(field, livroId) {
+    let formData = new FormData();
+    let livroForm = document.getElementById('editLivroForm' + livroId);
+
+    // Adicionar o método PUT explicitamente ao FormData
+    formData.append('_method', 'PUT'); // Para garantir que o Laravel trate como PUT
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+
+    // Adicionar campos individuais
+    let input = document.getElementById(field + 'Input' + livroId);
+    formData.append(field, input.files ? input.files[0] : input.value); // Verificar se é arquivo ou texto
+
+    // Enviar o AJAX
+    fetch(livroForm.action, {
+        method: 'POST', // Use POST, mas Laravel irá processar como PUT
+        body: formData,
+    })
+    .then(response => {
+        // Verificar se a resposta foi bem-sucedida (status 200)
+        if (!response.ok) {
+            throw new Error('Erro na requisição: ' + response.statusText);
+        }
+        return response.json(); // Tentar converter a resposta para JSON
+    })
+    .then(data => {
+        if (data.message) {
+            alert(data.message); // Mostrar mensagem de sucesso
+            location.reload(); // Recarregar a página após a atualização
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        // Exibir uma mensagem de erro mais amigável ao usuário
+        alert('Ocorreu um erro ao editar o livro. Tente novamente.');
+    });
+}
+
+</script>
+
 
 <script>
-    // Captura o clique no link para atualizar a relação livro-usuário
     document.querySelectorAll('.preview-link').forEach(link => {
-        link.addEventListener('click', function(event) {
-            event.preventDefault(); // Previne o comportamento padrão
+    link.addEventListener('click', function(event) {
+        event.preventDefault(); // Previne o comportamento padrão do link
 
-            const livroId = this.getAttribute('data-livro-id');
-            const userId = this.getAttribute('data-user-id');
+        const livroId = this.getAttribute('data-livro-id'); // ID do livro clicado
+        const userId = this.getAttribute('data-user-id'); // ID do usuário logado
+        const url = this.getAttribute('href'); // URL da rota para 'livro.exibir'
 
-            // Enviar dados para o controlador via AJAX
-            fetch("{{ route('salvar.livro') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({
-                    livro_id: livroId,
-                    users_id: userId
-                })
+        // Enviar dados para o controlador via AJAX
+        fetch("{{ route('salvar.livro') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                livro_id: livroId, // Envia o ID do livro
+                user_id: userId // Envia o ID do usuário
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message); // Mensagem de sucesso
-                // Aqui você pode atualizar a interface, se necessário
-            })
-            .catch(error => console.error('Erro:', error));
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro na requisição');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message); // Exibe a mensagem de sucesso no console
+            window.location.href = url; // Redireciona para a URL do livro
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao atualizar o livro. Tente novamente.');
         });
     });
+});
+
 </script>
     
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
-<script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
-    // Função para carregar e renderizar o PDF
-    async function renderPDF(pdfUrl, canvasId) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) {
-            console.error("Canvas não encontrado: " + canvasId);
-            return;
-        }
-
-        const ctx = canvas.getContext("2d");
-
-        try {
-            // Carrega o documento PDF
-            const pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
-            console.log('PDF carregado:', pdfDoc);
-
-            // Pega a primeira página
-            const page = await pdfDoc.getPage(1);
-            console.log('Página carregada:', page);
-
-            // Configurações de escala e tamanho
-            const viewport = page.getViewport({ scale: 1.5 });
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-
-            // Parâmetros de renderização
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport,
-            };
-
-            // Renderiza a página
-            await page.render(renderContext).promise;
-            console.log("PDF renderizado no canvas: " + canvasId);
-        } catch (error) {
-            console.error("Erro ao carregar/renderizar PDF:", error);
-        }
-    }
-
-    // Função para garantir que o PDF seja renderizado quando o modal for mostrado
-    function setupModalRender(event) {
-        const trigger = event.target.closest(".preview-link");
-        if (trigger) {
-            event.preventDefault();
-
-            const livroId = trigger.getAttribute("data-livro-id");
-            const pdfUrl = trigger.getAttribute("data-pdf-url");
-            const canvasId = "pdf-canvas" + livroId;
-
-            // Localiza o modal correspondente ao livro
-            const modal = document.getElementById("pdfModal" + livroId);
-            console.log("Modal encontrado: ", modal);
-
-            // Força o modal a ser exibido, removendo classes e alterando o display
-            modal.classList.add("show");
-            modal.style.display = "block";  // Garante que o modal será visível
-
-            // Exibe o modal usando o Bootstrap
-            const modalInstance = new bootstrap.Modal(modal);
-            modalInstance.show();
-
-            // Adiciona o evento para renderizar o PDF assim que o modal for exibido
-            modal.addEventListener('shown.bs.modal', function () {
-                // Atraso para garantir que o modal tenha sido exibido
-                setTimeout(() => {
-                    renderPDF(pdfUrl, canvasId);
-                }, 100);
-            }, { once: true });
-        }
-    }
-
-    // Vincula o evento de clique ao link de visualização
-    document.addEventListener("click", setupModalRender);
-</script>
 <script>
     // Exclusão de livro com confirmação
     document.querySelectorAll(".delete-link").forEach((button) => {
@@ -531,49 +649,47 @@ function saveLivro(livroId) {
             });
         });
     });
+    $(document).on("click", "#btnSalvarInicio", function () {
+    let livroId = $(this).data("livro-id");
+    let dataInicio = $("#inputDataInicio").val();
 
-    // Salvar datas de início e fim
-    $("#btnSalvarInicio").on("click", function () {
-        let livroId = $(this).data("livro-id");
-        let dataInicio = $("#inputDataInicio").val();
-
-        $.ajax({
-            url: "/historico/salvar",
-            method: "POST",
-            data: {
-                livro_id: livroId,
-                data_inicio_leitura: dataInicio,
-                _token: $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                alert(response.message);
-            },
-            error: function (xhr) {
-                alert("Erro ao salvar data de início: " + xhr.responseJSON.message);
-            },
-        });
+    $.ajax({
+        url: "/historico/salvar",
+        method: "POST",
+        data: {
+            livro_id: livroId,
+            data_inicio_leitura: dataInicio,
+            _token: $('meta[name="csrf-token"]').attr("content"),
+        },
+        success: function (response) {
+            alert(response.message);
+        },
+        error: function (xhr) {
+            alert("Erro ao salvar data de início: " + xhr.responseJSON.message);
+        },
     });
+});
 
-    $("#btnSalvarFim").on("click", function () {
-        let livroId = $(this).data("livro-id");
-        let dataFim = $("#inputDataFim").val();
+$(document).on("click", "#btnSalvarFim", function () {
+    let livroId = $(this).data("livro-id");
+    let dataFim = $("#inputDataFim").val();
 
-        $.ajax({
-            url: "/historico/salvar",
-            method: "POST",
-            data: {
-                livro_id: livroId,
-                data_fim_leitura: dataFim,
-                _token: $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                alert(response.message);
-            },
-            error: function (xhr) {
-                alert("Erro ao salvar data de fim: " + xhr.responseJSON.message);
-            },
-        });
+    $.ajax({
+        url: "/historico/salvar",
+        method: "POST",
+        data: {
+            livro_id: livroId,
+            data_fim_leitura: dataFim,
+            _token: $('meta[name="csrf-token"]').attr("content"),
+        },
+        success: function (response) {
+            alert(response.message);
+        },
+        error: function (xhr) {
+            alert("Erro ao salvar data de fim: " + xhr.responseJSON.message);
+        },
     });
+});
 </script>
 
 </section>

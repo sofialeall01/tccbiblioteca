@@ -2,100 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exibir PDF</title>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- PDF.js -->
+    <!-- PDF.js (Versão 2.16.105) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
     </script>
     <style>
         body {
-            margin: 0;
             background-color: #000; /* Fundo preto */
             color: #00ffff; /* Verde água */
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden; /* Impede rolagem */
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
         }
-
         #viewerContainer {
-            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            box-sizing: border-box;
-            padding-bottom: 40px; /* Reduzido para dar mais espaço ao PDF */
+            width: 100%; /* Ocupa toda a largura da tela */
+            height: 100vh; /* Altura igual à altura da tela */
+            padding: 10px; /* Padding para não colar nas bordas */
+            box-sizing: border-box; /* Para não ultrapassar o limite de largura */
         }
-
         #pdfViewer {
-            width: 100%;
-            height: calc(100% - 80px); /* Ajuste para o PDF ocupar mais espaço */
+            border: 1px solid #ccc;
+            background-color: #fff;
+            width: 50%; /* A largura será ajustada para o tamanho da tela */
+            height: 100%; /* A altura será ajustada para o tamanho da tela */
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #fff;
         }
-
         #pdfCanvas {
-            width: 100%;
-            height: auto;
-            object-fit: contain;
+            width: 100%; /* Faz o PDF ocupar toda a largura disponível */
+            height: 100%; /* Faz o PDF ocupar toda a altura disponível */
+            object-fit: contain; /* Faz o conteúdo se ajustar ao tamanho da tela */
         }
-
-        #controls {
+        .controls {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 5px 10px; /* Diminuído para botões menores */
-            background-color: #000;
-            color: #00ffff;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            z-index: 100;
+            margin-left: 20px;
         }
-
-        #controls button {
-            background-color: #00ffff;
+        .controls button {
+            background-color: #00ffff; /* Verde água */
             color: #000;
             border: none;
-            padding: 8px 16px; /* Botões menores */
-            font-size: 14px; /* Fontes menores */
-            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px 0;
             cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
         }
-
-        #controls button:disabled {
+        .controls button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-
-        #pageInfo {
-            flex: 1;
-            text-align: center;
-            font-size: 14px; /* Tamanho do texto ajustado */
         }
     </style>
 </head>
 <body>
-    <!-- Contêiner do Visualizador -->
     <div id="viewerContainer">
+        <!-- PDF Canvas -->
         <div id="pdfViewer">
             <canvas id="pdfCanvas"></canvas>
         </div>
-    </div>
 
-    <!-- Controles de Navegação -->
-    <div id="controls">
-        <button id="prevPage">Página Anterior</button>
-        <span id="pageInfo">Carregando...</span>
-        <button id="nextPage">Próxima Página</button>
+        <!-- Controles de Navegação -->
+        <div class="controls">
+            <button id="prevPage">Página Anterior</button>
+            <span id="pageInfo">Carregando...</span>
+            <button id="nextPage">Próxima Página</button>
+        </div>
     </div>
 
     <script>
@@ -103,7 +89,7 @@
         let pdfDoc = null;
         let currentPage = 1;
         let totalPages = 0;
-        const scale = 2.0; // Aumentado para 2.0 para melhorar a legibilidade
+        const scale = 1.5; // Ajuste a escala do PDF para ser maior
 
         const pdfCanvas = document.getElementById('pdfCanvas');
         const ctx = pdfCanvas.getContext('2d');
@@ -111,7 +97,7 @@
         const prevPageBtn = document.getElementById('prevPage');
         const nextPageBtn = document.getElementById('nextPage');
 
-        // Renderiza a página
+        // Função para renderizar uma página
         function renderPage(pageNum) {
             pdfDoc.getPage(pageNum).then(page => {
                 const viewport = page.getViewport({ scale });
@@ -141,7 +127,7 @@
             pageInfo.textContent = "Erro ao carregar o PDF.";
         });
 
-        // Botão de Página Anterior
+        // Navegar para a página anterior
         prevPageBtn.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
@@ -149,7 +135,7 @@
             }
         });
 
-        // Botão de Próxima Página
+        // Navegar para a próxima página
         nextPageBtn.addEventListener('click', () => {
             if (currentPage < totalPages) {
                 currentPage++;

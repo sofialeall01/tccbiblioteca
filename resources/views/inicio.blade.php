@@ -97,12 +97,13 @@
             <div class="col-lg-4">
                 <h1>Lendo Agora</h1>
                 @if ($livro && $livro->fotoCapa)
-                    <img src="{{ Storage::url($livro->fotoCapa) }}" class="img-fluid" alt="Capa do Livro">
-                
+                    <!-- Adicionando a rota ao redor da imagem sem modificar a posição -->
+                    <a href="{{ route('livro.mostrar', ['id' => $livro->id]) }}">
+                        <img src="{{ Storage::url($livro->fotoCapa) }}" class="img-fluid" alt="Capa do Livro">
+                    </a>
                 @endif
             </div>
             <div class="col-lg-5 content">
-             
                 <p class="fst-italic py-3">
                     Informações sobre sua leitura
                 </p>
@@ -123,6 +124,7 @@
         </div>
     </div>
 </section>
+
 
 
 <!-- /About Section -->
